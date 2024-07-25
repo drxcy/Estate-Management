@@ -1,8 +1,19 @@
 import express,{Router} from 'express';
- 
+import mongoDb from './DB/MonogDb.config.js'
+import mongoose from 'mongoose';
+import dotenv from 'dotenv'
+ dotenv.config();
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
+mongoDb();
+mongoose.connection.once("open", () => {
+console.log("Connected to DB");
 app.listen(port, ()=>
     {
     console.log(`listening on port ${port}`)
     });
+});
+mongoose.connection.on("error", (err) => {
+    console.log(err);
+    logEvents(`${err.name} : ${err.message}`, "mongoErrLog.log");
+  });
