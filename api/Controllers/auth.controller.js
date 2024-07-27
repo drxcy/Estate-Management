@@ -1,7 +1,8 @@
 import { errorHandler } from "../utils/ErrorHandler.js";
 import bcryptjs from "bcryptjs";
 import User from "../Models/user.model.js"
-import {CreateAccount} from "../Services/auth.services.js"
+import {CreateAccount,LoginAccount} from "../Services/auth.services.js"
+
 export const signup = async(req,res,next)=>
     {
         const { username,password,email} = req.body;
@@ -17,3 +18,16 @@ export const signup = async(req,res,next)=>
                 next(error);
             }
     }
+export const login = async (req,res,next) => {
+    const { email, password } = req.body;
+    if (!email || !password) {
+        return next(new errorHandler(500,"Please enter a both email and password."));
+    }
+    try {
+        await LoginAccount(email, password);
+        res.status(201).json("user login Successfully");
+    }
+    catch (error) {
+        return next(error);
+    }
+}
