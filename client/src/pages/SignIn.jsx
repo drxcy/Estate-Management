@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { Link,useNavigate} from "react-router-dom";
-
-export default function SignUp() {
+import { signInFailure,signInStart,signInSuccess } from "../Redux/User/userSlice";
+import { useDispatch,useSelector } from "react-redux";
+export default function SignIn() {
   const [formdata, setformdata] = useState({});
   const navigate =useNavigate();
+  const dispatch =useDispatch();
+  const {loading,error} =useSelector((state=>state.user))
   const submitHandler = async (e) => {
-    e.preventdefault();
+    e.preventDefault();
     try {
+      dispatch(signInStart());
       const res = await fetch("/api/auth/signin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -14,14 +18,15 @@ export default function SignUp() {
       });
       const data = await res.json();
       if(data.success==false){
-        alert(data.message);
+        dispatch(signInFailure(data.message));
+        return;
       }
-      if(data.success){
+      dispatch(signInSuccess(data));
         navigate('/');
-      }
+      
       
     } catch (error) {
-      alert(error.message);
+      dispatch(signInFailure(error.message));
     }
   };
 
@@ -49,18 +54,20 @@ export default function SignUp() {
           className="rounded-lg border p-3"
         />
         <button
+        disabled={loading}
           type="Submit"
           className="bg-blue-900 text-white p-3 font-semibold rounded-lg uppercase hover:opacity-95 disabled:opacity-80"
         >
-          Sign Up
+         {loading ? "Loading..." :"Sign In"}
         </button>
       </form>
       <div className="flex space-x-1 mt-5 font-semibold">
         <p className="text-left">Dont have an account?</p>{" "}
-        <Link to="Sign-up">
+        <Link to="/Sign-up">
           <span className="text-blue-900 hover:text-blue-700">Sign Up</span>
         </Link>
       </div>
+      {error && <p className='text-red-500 mt-5'>{error}</p>}
     </div>
   );
 }

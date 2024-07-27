@@ -1,6 +1,7 @@
 import { errorHandler } from "../utils/ErrorHandler.js";
 import bcryptjs from "bcryptjs";
 import User from "../Models/user.model.js"
+import jwt from 'jsonwebtoken';
 export const CreateAccount = async(username,password,email)=>
     {
         // check for user whether already exist or not
@@ -12,14 +13,14 @@ export const CreateAccount = async(username,password,email)=>
         throw new errorHandler(500,"Internal Server Error");
     }
     if(user){
-    return new(errorHandler("User already exists"));
+    throw new errorHandler("User already exists");
     }
     // Hashing the Password 
     let hashedPassword
     try {
         hashedPassword = bcryptjs.hashSync(password,10);
     } catch (error) {
-       return new(errorHandler("Password does not matched")) 
+       throw new errorHandler("Password does not matched");
     }
     //    Save to the database
         const newUser = new User(
@@ -30,7 +31,7 @@ export const CreateAccount = async(username,password,email)=>
             }
         );  
     }
-    export const LoginAccount = async()=>
+    export const LoginAccount = async(email,password)=>
         {
         // implement login logic here
         let user
@@ -39,49 +40,22 @@ export const CreateAccount = async(username,password,email)=>
             user = await User.findOne({email: email})
         }
         catch(error){
-            return new errorHandler(500,"Internal Server Error");
+            throw new errorHandler(500,"Internal Server Error");
         }
         if(!user){
-            return new(errorHandler(404,"User does not exist"));
+            throw new errorHandler(404,"User does not exist");
         }
         // check if password is correct
         let isValidPassword = bcryptjs.compareSync(password, user.password)
         if(!isValidPassword){
-            return new(errorHandler(201,"Wrong Credentials"));
-        }
+            throw new errorHandler(201,"Wrong Credentials");
+        
         // if everything is correct return the user
-        return user;
-    
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+        const { password: pass, ...restUserinfo } = user._doc;
+        // res.cookie('access_token', token, { httpOnly: true }).status(200).json(restUserinfo);
+      } 
     }
-    // export const signin = async (req,res,next)=>
-    //     {
-    //         const {email, password}=req.body;
-    //         if(!email ||!password ||email==='' || password==='')
-    //         {
-    //            next(errorHandler(500,'All Fields Required to Fills Field'));
-    //         }
-    //        try {
-    //         const checkUser= await User.findOne({email});
-    //         if(!checkUser)
-    //         {
-    //            return next(errorHandler(404,'User Not Found'));
-    //         }
-    //         const isMatchPassword = bcryptjs.compareSync(password,checkUser.password);
-    //        if(!isMatchPassword) {
-    //        return next(errorHandler(401,'Invalid User Password!!'));
-    //        }
-    //        const token = jwt.sign({User_id:checkUser._id,isAdmin:checkUser.isAdmin}
-    //         ,process.env.JWT_SECRET);
-    //         const {password:pass ,...rest}=checkUser._doc;
-    //         res
-    //         .status(200)
-    //         .cookie('access_token',token,
-    //         {
-    //          httpOnly: true,   
-    //         }).json(rest);
-        
-    //        } catch (err) {
-    //         next(err);
-    //        }
-        
-    //     }
+    
+    
+    

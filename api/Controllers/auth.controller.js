@@ -18,14 +18,15 @@ export const signup = async(req,res,next)=>
                 next(error);
             }
     }
-export const login = async (req,res,next) => {
+export const signin = async (req,res,next) => {
     const { email, password } = req.body;
     if (!email || !password) {
-        return next(new errorHandler(500,"Please enter a both email and password."));
+        return next(errorHandler(500,"Please enter a both email and password."));
     }
     try {
         await LoginAccount(email, password);
         res.status(201).json("user login Successfully");
+        res.cookie('access_token', token, { httpOnly: true }).status(200).json(restUserinfo);
     }
     catch (error) {
         return next(error);

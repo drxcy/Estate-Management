@@ -5,11 +5,13 @@ import dotenv from 'dotenv'
 import router from './Routes/server.js';
 import {logger,logEvents} from './Middlewares/logger.js';
 import Error_Handler from './Middlewares/error-handler.js';
-
+import corsOptions from './DB/cors-configure.js';
+import cors from'cors';
  dotenv.config();
-const app = express();
-const port = process.env.PORT || 3000;
-mongoDb();
+ const app = express();
+ const port = process.env.PORT || 3000;
+ mongoDb();
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended:false}));
 app.use(logger);
