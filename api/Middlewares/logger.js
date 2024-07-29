@@ -25,8 +25,8 @@ export const logEvents= async(message,logFilename)=>{
 
 };
 export const logger = (req,res,next)=>
-    {
-        logEvents(`${req.method}\t${req.url}\t${req.headers.origin}`, "reqLog.log");
+    {const origin = req.headers.origin || 'unknown origin';
+        logEvents(`${req.method}\t${req.url}\t${origin}`, "reqLog.log");
   next();
     }
     export default logger;

@@ -30,7 +30,7 @@ export default function SignUp() {
     }
   };
 
-  const changeHandler = (e) => {
+  const changeHandler = async (e) => {
     setformdata({ ...formdata, [e.target.id]: e.target.value });
   };
 
